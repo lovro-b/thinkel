@@ -882,14 +882,14 @@
             }
             
             const today = new Date();
-            const start = new Date(today.getFullYear(), 0, 0);
-            const diff = today - start;
-            const oneDay = 1000 * 60 * 60 * 24;
-            const dayOfYear = Math.floor(diff / oneDay);
-            const index = dayOfYear % currentQuotes.length;
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            const day = today.getDate();
+            const seed = (year * 10000) + (month * 100) + day;
+            const index = seed % currentQuotes.length;
             currentQuote = currentQuotes[index];
             
-            settings.text = currentQuote.text;
+            settings.text = currentQuote.text || currentQuote.besedilo || "";
             
             if (currentImage) drawCanvas();
         }

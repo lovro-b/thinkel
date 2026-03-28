@@ -23,7 +23,7 @@
 
         <main>
             <div class="card date-card">
-                <button class="date-picker-btn" onclick="document.getElementById('hidden-date-input').showPicker()" aria-label="Izberi datum">
+                <button class="date-picker-btn" onclick="openDatePicker()" aria-label="Izberi datum">
                     <span class="material-icons-round">today</span>
                 </button>
                 <div class="date-content">
@@ -113,6 +113,19 @@
 
     <script src="app.js"></script>
     <script>
+        function openDatePicker() {
+            const input = document.getElementById('hidden-date-input');
+            if (input.showPicker) {
+                try {
+                    input.showPicker();
+                } catch (e) {
+                    input.click();
+                }
+            } else {
+                input.click();
+            }
+        }
+
         // Initialize home page
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
