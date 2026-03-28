@@ -2,28 +2,18 @@
 let currentQuotes = [];
 let fallbackQuotes = {
     sl: [
-        {"id": 1, "text": "Edini način, da narediš odlično delo, je, da imaš radi tisto, kar delaš.", "author": "Steve Jobs"},
-        {"id": 2, "text": "Uspeh ni konec, neuspeh ni usoden: pogum nadaljevati je tisto, što šteje.", "author": "Winston Churchill"},
-        {"id": 3, "text": "Bodi sprememba, ki jo želiš videti v svetu.", "author": "Mahatma Gandhi"},
-        {"id": 4, "text": "Preteklosti ne moremo spremeniti, a prihodnost lahko oblikujemo.", "author": "Buddha"},
-        {"id": 5, "text": "Sreča ni tisto, kar imaš. Je tisto, kaj si deliš in kaj si daš.", "author": "Sokrat"},
-        {"id": 6, "text": "Vsaka pot se začne s prvim korakom.", "author": "Lao Tzu"},
-        {"id": 7, "text": "Verjemite si, da ste in da ste lahko to, kar želite.", "author": "Aristotel"},
-        {"id": 8, "text": "Najtežje je prvo korakniti, a najboljše je, da sploh stopite.", "author": "Neznan avtor"},
-        {"id": 9, "text": "Življenje je tisto, kar se ti dogaja, medtem ko si zaposlen z načrtovanjem.", "author": "John Lennon"},
-        {"id": 10, "text": "Bodite pogumni. Možno je tudi nemogoče.", "author": "Alica v čudežni deželi"}
+        {"id": 1, "text": "Ne moreš spremeniti nekoga. Lahko jih poskušaš razumeti, jih opazuješ in poslušaš. Ko jih razumeš, jim lahko pomagaš, da se spremenijo.", "author": "Anonymous"},
+        {"id": 2, "text": "Obstaja samo ena pot – sledi svojemu srcu.", "author": "Anonymous"},
+        {"id": 3, "text": "Pozorno opazuj ljudi. Opazil boš, če nekaj skrivajo. Ne glede na to, ali hočejo ali ne, bo njihovo vedenje to razkrilo.", "author": "Anonymous"},
+        {"id": 4, "text": "Ne nasprotuj brez razmišljanja idejam drugih. Poskušaj jih razumeti. Morda ti želijo pokazati nekaj, česar sam ne opažaš.", "author": "Anonymous"},
+        {"id": 5, "text": "Če opaziš, da ljudje delajo čudne stvari, jih ne sprašuj, kako so to naredili, ker ti ne bodo povedali. Namesto tega jih natančno opazuj – razlog za njihov uspeh je razviden iz njihovih dejanj.", "author": "Anonymous"}
     ],
     en: [
-        {"id": 1, "text": "The only way to do great work is to love what you do.", "author": "Steve Jobs"},
-        {"id": 2, "text": "Success is not final, failure is not fatal: it is the courage to continue that counts.", "author": "Winston Churchill"},
-        {"id": 3, "text": "Be the change you want to see in the world.", "author": "Mahatma Gandhi"},
-        {"id": 4, "text": "The past cannot be changed, but the future can be shaped.", "author": "Buddha"},
-        {"id": 5, "text": "Happiness is not what you have. It is what you share and what you give.", "author": "Socrates"},
-        {"id": 6, "text": "Every journey begins with a single step.", "author": "Lao Tzu"},
-        {"id": 7, "text": "Believe you can and you're halfway there.", "author": "Theodore Roosevelt"},
-        {"id": 8, "text": "The hardest part is starting, but the best part is just starting.", "author": "Unknown"},
-        {"id": 9, "text": "Life is what happens when you're busy making other plans.", "author": "John Lennon"},
-        {"id": 10, "text": "Be brave. Anything is possible.", "author": "Alice in Wonderland"}
+        {"id": 1, "text": "You can't change someone. You can try to understand them, watch them, and listen to them. When you understand them, you can help them to change.", "author": "Anonymous"},
+        {"id": 2, "text": "There is only one way - follow your heart.", "author": "Anonymous"},
+        {"id": 3, "text": "Watch people carefully. You'll notice if someone is hiding something. Whether they want to or not, their behavior will give them away.", "author": "Anonymous"},
+        {"id": 4, "text": "Don't mindlessly resist other people's ideas. Try to understand them. Maybe they want to show you something that you don't notice yourself.", "author": "Anonymous"},
+        {"id": 5, "text": "If you notice people doing strange things, don't ask them how they did it because they won't tell you. Instead, observe them closely - the reason for their success is evident in their actions.", "author": "Anonymous"}
     ]
 };
 
@@ -53,7 +43,7 @@ const translations = {
         delete_confirm_title: "Izbriši citat?", delete_confirm_text: "Ali ste prepričani, da želite ta citat trajno odstraniti iz vaših priljubljenih?",
         delete_note_title: "Izbriši zapisek?", delete_note_text: "Ali ste prepričani, da želite ta zapisek izbrisati?",
         cancel: "Prekliči", delete_yes: "Da, izbriši",
-        usage_tips: "Znamki za uporabo", tip1: "Kliknite srce, da citat shranite.", tip2: "Kliknite ikono za zapiske za misli.", tip3: "Pri zapiskih uporabite dolgi klik za urejanje ali brisanje.",
+        usage_tips: "Namigi za uporabo", tip1: "Kliknite srce, da citat shranite.", tip2: "Kliknite ikono za zapiske za misli.", tip3: "Pri zapiskih uporabite dolgi klik za urejanje ali brisanje.",
         copied: "Kopirano", added_fav: "Dodano med priljubljene", removed_fav: "Odstranjeno", removed_note: "Zapisek izbrisan.",
         toast_backup_success: "Backup uspešno prenesen.", toast_restore_success: "Podatki uspešno obnovljeni.",
         wallpaper_editor: "Urejevalnik ozadij", open_wallpaper: "Odpri urejevalnik"
@@ -90,7 +80,17 @@ async function loadQuotes() {
         }
         
         const data = await response.json();
-        currentQuotes = data.citati || [];
+        currentQuotes = data.citati || data.quotes || [];
+
+        // Basic migration if needed (ensuring all have 'text' and 'author')
+        currentQuotes = currentQuotes.map(q => {
+            return {
+                id: q.id,
+                text: q.text || q.besedilo || "",
+                author: q.author || "Anonymous"
+            };
+        });
+
         return currentQuotes;
     } catch (error) {
         console.error('Error loading quotes:', error);
@@ -365,11 +365,14 @@ async function handleDateChange(dateString) {
         await loadQuotes();
     }
     
-    const start = new Date(chosenDate.getFullYear(), 0, 0);
-    const diff = chosenDate - start;
-    const oneDay = 1000 * 60 * 60 * 24;
-    const dayOfYear = Math.floor(diff / oneDay);
-    const index = dayOfYear % currentQuotes.length;
+    // Stable daily quote selection: use year, month and day to create a seed
+    const year = chosenDate.getFullYear();
+    const month = chosenDate.getMonth();
+    const day = chosenDate.getDate();
+
+    // Simple hash function for date
+    const seed = (year * 10000) + (month * 100) + day;
+    const index = seed % currentQuotes.length;
     currentQuote = currentQuotes[index];
     
     const quoteTextEl = document.getElementById('daily-quote-text');
