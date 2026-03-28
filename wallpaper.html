@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#143028">
+    
+    <title>Thinkel - Urejevalnik Ozadij</title>
+    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Caveat:wght@400;700&family=Montserrat:wght@400;600&family=Merriweather:wght@300;400;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        :root {
+            --base-font-size: 16px;
+            --quote-font-size: 1.6rem;
+        }
+        
+        html, body {
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            font-size: var(--base-font-size);
+        }
+        
+        #wallpaper-page {
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+        }
+        
+        #wallpaper-page #app-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #wallpaper-page main {
+            flex: 1;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+        
+        .editor-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+        
+        /* Preview Section */
+        .preview-section {
+            flex: 0 0 45%;
+            position: relative;
+            background: var(--surface-color);
+            margin: 15px 20px 10px 20px;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+            min-height: 200px;
+        }
+        
+        #canvas-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%), 
+                        linear-gradient(-45deg, rgba(0,0,0,0.1) 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.1) 75%), 
+                        linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.1) 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            background-color: rgba(0,0,0,0.05);
+            display: block;
+        }
+        
+        .upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--surface-color);
+            border: 2px dashed var(--surface-light);
+            border-radius: var(--radius-xl);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-overlay:hover, .upload-overlay.drag-active {
+            border-color: var(--accent-color);
+            background: var(--surface-light);
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+        
+        .upload-text {
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 0 20px;
+            font-size: 0.95rem;
+        }
+        
+        .upload-hint {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            opacity: 0.6;
+            margin-top: 8px;
+        }
+        
+        .change-image-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+        
+        .change-image-btn.visible {
+            display: flex;
+        }
+        
+        .change-image-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .image-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            display: none;
+        }
+        
+        .image-info.visible {
+            display: block;
+        }
+        
+        /* Controls Section */
+        .controls-section {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+            padding: 10px 20px 40px 20px;
+        }
+        
+        .controls-section::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .control-group {
+            margin-bottom: 16px;
+            background: var(--surface-color);
+            padding: 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
+        }
+        
+        body.light-theme .control-group {
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .control-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            display: block;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+        
+        /* Font Selector */
+        .font-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        
+        .font-option {
+            padding: 10px 4px;
+            background: var(--surface-light);
+            border: 2px solid transparent;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .font-option.active {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            background: rgba(129, 199, 132, 0.15);
+        }
+        
+        .font-option.playfair { font-family: 'Playfair Display', serif; font-size: 0.9rem; }
+        .font-option.lato { font-family: 'Lato', sans-serif; }
+        .font-option.caveat { font-family: 'Caveat', cursive; font-size: 1rem; }
+        .font-option.montserrat { font-family: 'Montserrat', sans-serif; font-weight: 600; }
+        .font-option.merriweather { font-family: 'Merriweather', serif; font-size: 0.75rem; }
+        .font-option.dancing { font-family: 'Dancing Script', cursive; font-size: 1rem; }
+        
+        /* Color Section */
+        .color-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .color-swatch {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+        
+        .color-swatch.active {
+            border-color: var(--accent-color);
+            transform: scale(1.1);
+            box-shadow: 0 0 0 2px var(--surface-color), 0 0 0 4px var(--accent-color);
+        }
+        
+        .color-swatch.white { background: #ffffff; }
+        .color-swatch.black { background: #000000; }
+        
+        .color-wheel {
+            background: conic-gradient(from 0deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .color-wheel::after {
+            content: 'colorize';
+            font-family: 'Material Icons Round';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+        
+        /* Color Picker Modal */
+        .color-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+        
+        .color-modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .color-modal-card {
+            background: var(--surface-color);
+            width: 100%;
+            max-width: 320px;
+            border-radius: var(--radius-xl);
+            padding: 25px;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255,255,255,0.1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .color-modal-overlay.open .color-modal-card {
+            transform: scale(1);
+        }
+        
+        .color-modal-title {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            margin: 0 0 20px 0;
+            text-align: center;
+            font-family: var(--font-quote);
+        }
+        
+        .color-input-wrapper {
+            position: relative;
+            width: 100%;
+            height: 50px;
+            margin-bottom: 20px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        #color-picker-input {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .color-input-label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--surface-light);
+            color: var(--text-secondary);
+            font-weight: 600;
+            pointer-events: none;
+            border-radius: var(--radius-md);
+        }
+        
+        .recent-colors {
+            margin-bottom: 20px;
+        }
+        
+        .recent-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .recent-grid {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .recent-color {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.2);
+            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .recent-color:active {
+            transform: scale(0.9);
+        }
+        
+        .recent-color.empty {
+            background: var(--surface-light);
+            border: 2px dashed var(--text-secondary);
+            opacity: 0.3;
+        }
+        
+        .close-color-modal {
+            width: 100%;
+            padding: 14px;
+            background: var(--surface-light);
+            border: none;
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font-ui);
+            font-size: 1rem;
+            touch-action: manipulation;
+        }
+        
+        /* Sliders */
+        .slider-container {
+            margin-bottom: 8px;
+        }
+        
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--surface-light);
+            outline: none;
+            margin: 6px 0;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            border: 2px solid var(--bg-color);
+            transition: transform 0.1s;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+        }
+        
+        /* Reversed slider for Right Margin */
+        input[type="range"].reversed {
+            direction: rtl;
+        }
+        
+        /* Lock Button */
+        .lock-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: -5px 0 10px 0;
+        }
+        
+        .lock-btn {
+            background: rgba(129, 199, 132, 0.2);
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 18px;
+        }
+        
+        .lock-btn.unlocked {
+            background: var(--surface-light);
+            border-color: var(--text-secondary);
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+        
+        .lock-btn:active {
+            transform: scale(0.9);
+        }
+        
+        /* Alignment */
+        .alignment-row {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .align-btn {
+            flex: 1;
+            height: 44px;
+            background: var(--surface-light);
+            border: 2px solid transparent;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+        
+        .align-btn.active {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            background: rgba(129, 199, 132, 0.15);
+        }
+        
+        .align-btn .material-icons-round {
+            font-size: 22px;
+        }
+        
+        /* Download Button */
+        .download-btn {
+            background: var(--accent-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 16px 28px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px auto 30px auto;
+            box-shadow: 0 4px 15px rgba(129, 199, 132, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .download-btn:active {
+            transform: translateY(2px) scale(0.98);
+            box-shadow: 0 2px 8px rgba(129, 199, 132, 0.3);
+        }
+        
+        .download-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: var(--surface-light);
+            color: var(--text-secondary);
+            box-shadow: none;
+        }
+        
+        .download-btn .material-icons-round {
+            font-size: 20px;
+        }
+        
+        #wallpaper-page .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            z-index: 2000;
+        }
+        
+        #wallpaper-page .bottom-nav {
+            display: none;
+        }
+        
+        @media (min-width: 768px) {
+            .preview-section {
+                flex: 0 0 50%;
+            }
+            
+            .controls-section {
+                padding-bottom: 20px;
+            }
+            
+            .download-btn {
+                width: auto;
+                min-width: 250px;
+            }
+        }
+        
+        @media (max-height: 600px) {
+            .preview-section {
+                flex: 0 0 40%;
+                margin: 10px 15px 5px 15px;
+            }
+            
+            .control-group {
+                padding: 10px;
+                margin-bottom: 8px;
+            }
+            
+            .controls-section {
+                padding: 5px 15px 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body class="dark-theme" id="wallpaper-page">
+
+    <div id="app-container">
+        <header style="padding: 12px 20px; flex-shrink: 0;">
+            <button class="back-btn" onclick="window.location.href='settings.html'" style="display: flex; position: absolute; left: 20px; top: 50%; transform: translateY(-50%);">
+                <span class="material-icons-round">arrow_back</span>
+            </button>
+            <h1 style="font-size: 1.1rem;">Urejevalnik ozadij</h1>
+        </header>
+
+        <main>
+            <div class="editor-container">
+                <!-- Top: Preview -->
+                <div class="preview-section" id="drop-zone">
+                    <input type="file" id="image-input" accept="image/*" style="display: none;">
+                    <canvas id="canvas-preview"></canvas>
+                    <div class="upload-overlay" id="upload-prompt" onclick="document.getElementById('image-input').click()">
+                        <span class="material-icons-round upload-icon">wallpaper</span>
+                        <div class="upload-text">Tapnite za nalaganje slike</div>
+                        <div class="upload-hint">ali povlecite in spustite</div>
+                    </div>
+                    <button class="change-image-btn" id="change-btn" onclick="document.getElementById('image-input').click()">
+                        <span class="material-icons-round" style="font-size: 18px;">edit</span>
+                        Spremeni
+                    </button>
+                    <div class="image-info" id="image-info"></div>
+                </div>
+
+                <!-- Bottom: Controls -->
+                <div class="controls-section">
+                    <!-- 1. Font Size -->
+                    <div class="control-group" style="margin-bottom: 12px;">
+                        <div class="slider-labels">
+                            <span>Majhna</span>
+                            <span id="size-val">Srednja</span>
+                            <span>Velika</span>
+                        </div>
+                        <input type="range" id="font-size" min="20" max="80" value="40">
+                    </div>
+
+                    <!-- 2. Text Alignment -->
+                    <div class="control-group" style="margin-bottom: 12px;">
+                        <label class="control-label">Poravnava besedila</label>
+                        <div class="alignment-row">
+                            <button class="align-btn" onclick="changeAlign('left', this)" title="Levo">
+                                <span class="material-icons-round">format_align_left</span>
+                            </button>
+                            <button class="align-btn active" onclick="changeAlign('center', this)" title="Sredina">
+                                <span class="material-icons-round">format_align_center</span>
+                            </button>
+                            <button class="align-btn" onclick="changeAlign('right', this)" title="Desno">
+                                <span class="material-icons-round">format_align_right</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3. Vertical Position -->
+                    <div class="control-group" style="margin-bottom: 12px;">
+                        <label class="control-label">Vertikalni položaj</label>
+                        <div class="slider-labels">
+                            <span>Zgoraj</span>
+                            <span id="top-val">50%</span>
+                            <span>Spodaj</span>
+                        </div>
+                        <input type="range" id="top-offset" min="5" max="95" value="50">
+                    </div>
+
+                    <!-- 4. Left & Right Margins -->
+                    <div class="control-group" style="margin-bottom: 12px;">
+                        <div class="lock-container">
+                            <button class="lock-btn" id="lock-btn" onclick="toggleLock()" title="Zakleni robove skupaj">
+                                <span class="material-icons-round" id="lock-icon">lock</span>
+                            </button>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <div class="slider-labels">
+                                    <span>Levi rob</span>
+                                    <span id="left-val">10%</span>
+                                </div>
+                                <input type="range" id="left-offset" min="0" max="40" value="10">
+                            </div>
+                            <div>
+                                <div class="slider-labels">
+                                    <span>Desni rob</span>
+                                    <span id="right-val">10%</span>
+                                </div>
+                                <!-- Reversed: 0 on right, 40 on left visually -->
+                                <input type="range" id="right-offset" class="reversed" min="0" max="40" value="30">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Font Selection -->
+                    <div class="control-group" style="margin-bottom: 12px;">
+                        <label class="control-label">Slog pisave</label>
+                        <div class="font-selector">
+                            <div class="font-option playfair active" onclick="changeFont('Playfair Display', this)">Klasična</div>
+                            <div class="font-option lato" onclick="changeFont('Lato', this)">Čista</div>
+                            <div class="font-option caveat" onclick="changeFont('Caveat', this)">Sproščena</div>
+                            <div class="font-option montserrat" onclick="changeFont('Montserrat', this)">Moderna</div>
+                            <div class="font-option merriweather" onclick="changeFont('Merriweather', this)">Elegantna</div>
+                            <div class="font-option dancing" onclick="changeFont('Dancing Script', this)">Rokopis</div>
+                        </div>
+                    </div>
+
+                    <!-- 6. Color Selection (Last) -->
+                    <div class="control-group" style="margin-bottom: 16px;">
+                        <label class="control-label">Barva besedila</label>
+                        <div class="color-row">
+                            <div class="color-swatch white active" onclick="changeColor('#ffffff', this)" title="Bela"></div>
+                            <div class="color-swatch black" onclick="changeColor('#000000', this)" title="Črna"></div>
+                            <div class="color-swatch color-wheel" onclick="openColorPicker()" title="Poljubna barva"></div>
+                        </div>
+                    </div>
+
+                    <!-- Download Button -->
+                    <button class="download-btn" id="download-btn" onclick="downloadWallpaper()" disabled>
+                        <span class="material-icons-round">download</span>
+                        Shrani ozadje
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Color Picker Modal -->
+    <div id="color-modal" class="color-modal-overlay" onclick="closeColorPicker(event)">
+        <div class="color-modal-card" onclick="event.stopPropagation()">
+            <h3 class="color-modal-title">Izberi barvo</h3>
+            
+            <div class="color-input-wrapper" onclick="document.getElementById('color-picker-input').click()">
+                <input type="color" id="color-picker-input" onchange="handleColorPick(this.value)">
+                <div class="color-input-label" id="current-color-display" style="background: #81C784;">
+                    Tapnite za izbiro barve
+                </div>
+            </div>
+            
+            <div class="recent-colors">
+                <span class="recent-label">Nedavne barve</span>
+                <div class="recent-grid" id="recent-colors-grid">
+                    <div class="recent-color empty"></div>
+                    <div class="recent-color empty"></div>
+                    <div class="recent-color empty"></div>
+                    <div class="recent-color empty"></div>
+                    <div class="recent-color empty"></div>
+                    <div class="recent-color empty"></div>
+                </div>
+            </div>
+            
+            <button class="close-color-modal" onclick="closeColorPicker()">Končano</button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <span class="material-icons-round toast-icon">check_circle</span>
+        <span id="toast-message">Ozadje shranjeno!</span>
+    </div>
+
+    <script>
+        // Fallback quotes data
+        const fallbackQuotes = {
+            sl: [
+                {"id": 1, "text": "Edini način, da narediš odlično delo, je, da imaš radi tisto, kar delaš.", "author": "Steve Jobs"},
+                {"id": 2, "text": "Bodi sprememba, ki jo želiš videti v svetu.", "author": "Mahatma Gandhi"},
+                {"id": 3, "text": "Vsaka pot se začne s prvim korakom.", "author": "Lao Tzu"}
+            ],
+            en: [
+                {"id": 1, "text": "The only way to do great work is to love what you do.", "author": "Steve Jobs"},
+                {"id": 2, "text": "Be the change you wish to see in the world.", "author": "Mahatma Gandhi"},
+                {"id": 3, "text": "Every journey begins with a single step.", "author": "Lao Tzu"}
+            ]
+        };
+        
+        let currentQuotes = [];
+        let currentQuote = null;
+        let currentLang = localStorage.getItem('lang') || 'sl';
+        let recentColors = JSON.parse(localStorage.getItem('recentColors') || '[]');
+        let marginsLocked = true;
+        
+        // Store original image and dimensions
+        let currentImage = null;
+        let originalImage = null;
+        let originalWidth = 0;
+        let originalHeight = 0;
+        
+        let settings = {
+            text: '',
+            font: 'Playfair Display',
+            color: '#ffffff',
+            align: 'center',
+            top: 50,
+            leftOffset: 10,
+            rightOffset: 10,
+            fontSize: 40,
+            shadow: true
+        };
+
+        const canvas = document.getElementById('canvas-preview');
+        const ctx = canvas.getContext('2d');
+        
+        // Apply settings from localStorage (font size, theme)
+        function loadAppSettings() {
+            // Theme
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'light') {
+                document.body.classList.add('light-theme');
+            }
+            
+            // Font size from settings
+            const fontSize = localStorage.getItem('fontSize') || 'medium';
+            applyFontSize(fontSize);
+        }
+        
+        function applyFontSize(size) {
+            const root = document.documentElement;
+            if (size === 'small') {
+                root.style.setProperty('--base-font-size', '14px');
+                root.style.setProperty('--quote-font-size', '1.4rem');
+            } else if (size === 'large') {
+                root.style.setProperty('--base-font-size', '18px');
+                root.style.setProperty('--quote-font-size', '1.8rem');
+            } else {
+                root.style.setProperty('--base-font-size', '16px');
+                root.style.setProperty('--quote-font-size', '1.6rem');
+            }
+        }
+        
+        // Load daily quote
+        async function loadDailyQuote() {
+            try {
+                const fileName = currentLang === 'sl' ? 'sl.citati.json' : 'en.citati.json';
+                const response = await fetch(fileName);
+                if (!response.ok) throw new Error('Failed to load');
+                const data = await response.json();
+                currentQuotes = data.citati || data.quotes || [];
+            } catch (error) {
+                console.error('Error loading quotes:', error);
+                currentQuotes = fallbackQuotes[currentLang] || fallbackQuotes.sl;
+            }
+            
+            const today = new Date();
+            const start = new Date(today.getFullYear(), 0, 0);
+            const diff = today - start;
+            const oneDay = 1000 * 60 * 60 * 24;
+            const dayOfYear = Math.floor(diff / oneDay);
+            const index = dayOfYear % currentQuotes.length;
+            currentQuote = currentQuotes[index];
+            
+            settings.text = currentQuote.text;
+            
+            if (currentImage) drawCanvas();
+        }
+
+        // Event Listeners
+        document.getElementById('image-input').addEventListener('change', handleImageUpload);
+        
+        const dropZone = document.getElementById('drop-zone');
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            document.getElementById('upload-prompt').classList.add('drag-active');
+        });
+        dropZone.addEventListener('dragleave', () => document.getElementById('upload-prompt').classList.remove('drag-active'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            document.getElementById('upload-prompt').classList.remove('drag-active');
+            if (e.dataTransfer.files.length > 0) {
+                document.getElementById('image-input').files = e.dataTransfer.files;
+                handleImageUpload({ target: document.getElementById('image-input') });
+            }
+        });
+
+        // Sliders
+        document.getElementById('font-size').addEventListener('input', (e) => {
+            settings.fontSize = parseInt(e.target.value);
+            document.getElementById('size-val').textContent = settings.fontSize < 35 ? 'Majhna' : settings.fontSize > 60 ? 'Velika' : 'Srednja';
+            drawCanvas();
+        });
+
+        document.getElementById('top-offset').addEventListener('input', (e) => {
+            settings.top = parseInt(e.target.value);
+            document.getElementById('top-val').textContent = settings.top + '%';
+            drawCanvas();
+        });
+
+        document.getElementById('left-offset').addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            settings.leftOffset = val;
+            document.getElementById('left-val').textContent = val + '%';
+            
+            if (marginsLocked) {
+                settings.rightOffset = val;
+                document.getElementById('right-offset').value = val;
+                document.getElementById('right-val').textContent = val + '%';
+            }
+            drawCanvas();
+        });
+
+        document.getElementById('right-offset').addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            settings.rightOffset = val;
+            document.getElementById('right-val').textContent = val + '%';
+            
+            if (marginsLocked) {
+                settings.leftOffset = val;
+                document.getElementById('left-offset').value = val;
+                document.getElementById('left-val').textContent = val + '%';
+            }
+            drawCanvas();
+        });
+
+        function toggleLock() {
+            marginsLocked = !marginsLocked;
+            const btn = document.getElementById('lock-btn');
+            const icon = document.getElementById('lock-icon');
+            
+            if (marginsLocked) {
+                btn.classList.remove('unlocked');
+                icon.textContent = 'lock';
+                const leftVal = parseInt(document.getElementById('left-offset').value);
+                settings.leftOffset = leftVal;
+                settings.rightOffset = leftVal;
+                document.getElementById('right-offset').value = leftVal;
+                document.getElementById('left-val').textContent = leftVal + '%';
+                document.getElementById('right-val').textContent = leftVal + '%';
+                drawCanvas();
+            } else {
+                btn.classList.add('unlocked');
+                icon.textContent = 'lock_open';
+            }
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    originalWidth = img.width;
+                    originalHeight = img.height;
+                    originalImage = img;
+                    
+                    const infoEl = document.getElementById('image-info');
+                    infoEl.textContent = `${originalWidth} × ${originalHeight}`;
+                    infoEl.classList.add('visible');
+                    
+                    let displayWidth = originalWidth;
+                    let displayHeight = originalHeight;
+                    const maxDisplayWidth = 1080;
+                    const maxDisplayHeight = 1920;
+                    
+                    if (displayWidth > maxDisplayWidth) {
+                        const ratio = maxDisplayWidth / displayWidth;
+                        displayHeight = displayHeight * ratio;
+                        displayWidth = maxDisplayWidth;
+                    }
+                    if (displayHeight > maxDisplayHeight) {
+                        const ratio = maxDisplayHeight / displayHeight;
+                        displayWidth = displayWidth * ratio;
+                        displayHeight = maxDisplayHeight;
+                    }
+                    
+                    canvas.width = displayWidth;
+                    canvas.height = displayHeight;
+                    
+                    currentImage = img;
+                    document.getElementById('upload-prompt').style.display = 'none';
+                    document.getElementById('change-btn').classList.add('visible');
+                    document.getElementById('download-btn').disabled = false;
+                    
+                    drawCanvas();
+                    showToast(`Slika naložena (${originalWidth}×${originalHeight})`);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function drawCanvas() {
+            if (!currentImage || !originalImage) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+            
+            if (settings.text) {
+                drawTextPreview();
+            }
+        }
+
+        function drawTextPreview() {
+            const leftX = (settings.leftOffset / 100) * canvas.width;
+            const rightX = canvas.width - ((settings.rightOffset / 100) * canvas.height);
+            const maxWidth = rightX - leftX;
+            const centerY = (settings.top / 100) * canvas.height;
+            
+            const scaleFactor = canvas.width / originalWidth;
+            const displayFontSize = settings.fontSize * scaleFactor * (originalWidth / 400);
+            
+            ctx.font = `${displayFontSize}px "${settings.font}"`;
+            ctx.fillStyle = settings.color;
+            ctx.textBaseline = 'middle';
+            
+            if (settings.shadow) {
+                ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                ctx.shadowBlur = 8 * scaleFactor;
+                ctx.shadowOffsetX = 2 * scaleFactor;
+                ctx.shadowOffsetY = 2 * scaleFactor;
+            }
+            
+            const lineHeight = displayFontSize * 1.3;
+            const words = settings.text.split(' ');
+            let line = '';
+            let lines = [];
+            
+            for (let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + ' ';
+                if (ctx.measureText(testLine).width > maxWidth && n > 0) {
+                    lines.push(line);
+                    line = words[n] + ' ';
+                } else {
+                    line = testLine;
+                }
+            }
+            lines.push(line);
+            
+            const totalHeight = lines.length * lineHeight;
+            const startY = centerY - (totalHeight / 2) + (lineHeight / 2);
+            
+            lines.forEach((lineText, i) => {
+                let x;
+                if (settings.align === 'left') {
+                    x = leftX;
+                } else if (settings.align === 'right') {
+                    x = rightX;
+                } else {
+                    x = leftX + (maxWidth / 2);
+                }
+                ctx.textAlign = settings.align;
+                ctx.fillText(lineText.trim(), x, startY + (i * lineHeight));
+            });
+            
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+        }
+
+        function downloadWallpaper() {
+            if (!originalImage) return;
+            
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = originalWidth;
+            exportCanvas.height = originalHeight;
+            const exportCtx = exportCanvas.getContext('2d');
+            
+            exportCtx.drawImage(originalImage, 0, 0, originalWidth, originalHeight);
+            
+            if (settings.text) {
+                const leftX = (settings.leftOffset / 100) * originalWidth;
+                const rightX = originalWidth - ((settings.rightOffset / 100) * originalWidth);
+                const maxWidth = rightX - leftX;
+                const centerY = (settings.top / 100) * originalHeight;
+                
+                const scaleFactor = originalWidth / 400;
+                const fontSize = settings.fontSize * scaleFactor;
+                
+                exportCtx.font = `${fontSize}px "${settings.font}"`;
+                exportCtx.fillStyle = settings.color;
+                exportCtx.textBaseline = 'middle';
+                
+                if (settings.shadow) {
+                    exportCtx.shadowColor = 'rgba(0,0,0,0.6)';
+                    exportCtx.shadowBlur = 8 * scaleFactor;
+                    exportCtx.shadowOffsetX = 2 * scaleFactor;
+                    exportCtx.shadowOffsetY = 2 * scaleFactor;
+                }
+                
+                const lineHeight = fontSize * 1.3;
+                const words = settings.text.split(' ');
+                let line = '';
+                let lines = [];
+                
+                for (let n = 0; n < words.length; n++) {
+                    const testLine = line + words[n] + ' ';
+                    if (exportCtx.measureText(testLine).width > maxWidth && n > 0) {
+                        lines.push(line);
+                        line = words[n] + ' ';
+                    } else {
+                        line = testLine;
+                    }
+                }
+                lines.push(line);
+                
+                const totalHeight = lines.length * lineHeight;
+                const startY = centerY - (totalHeight / 2) + (lineHeight / 2);
+                
+                lines.forEach((lineText, i) => {
+                    let x;
+                    if (settings.align === 'left') {
+                        x = leftX;
+                    } else if (settings.align === 'right') {
+                        x = rightX;
+                    } else {
+                        x = leftX + (maxWidth / 2);
+                    }
+                    exportCtx.textAlign = settings.align;
+                    exportCtx.fillText(lineText.trim(), x, startY + (i * lineHeight));
+                });
+            }
+            
+            const link = document.createElement('a');
+            link.download = `thinkel-wallpaper-${originalWidth}x${originalHeight}-${new Date().toISOString().split('T')[0]}.png`;
+            link.href = exportCanvas.toDataURL('image/png', 1.0);
+            link.click();
+            
+            showToast(`Shranjeno: ${originalWidth}×${originalHeight}px`);
+        }
+
+        function changeFont(font, element) {
+            settings.font = font;
+            document.querySelectorAll('.font-option').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            drawCanvas();
+        }
+
+        function changeColor(color, element) {
+            settings.color = color;
+            document.querySelectorAll('.color-swatch').forEach(el => {
+                if (!el.classList.contains('color-wheel')) el.classList.remove('active');
+            });
+            if (element) element.classList.add('active');
+            drawCanvas();
+        }
+
+        function changeAlign(align, element) {
+            settings.align = align;
+            document.querySelectorAll('.align-btn').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            drawCanvas();
+        }
+
+        function openColorPicker() {
+            updateRecentColorsDisplay();
+            document.getElementById('color-modal').classList.add('open');
+        }
+
+        function closeColorPicker(e) {
+            if (!e || e.target.id === 'color-modal' || e.target.classList.contains('close-color-modal')) {
+                document.getElementById('color-modal').classList.remove('open');
+            }
+        }
+
+        function handleColorPick(color) {
+            settings.color = color;
+            document.getElementById('current-color-display').style.background = color;
+            document.querySelectorAll('.color-swatch:not(.color-wheel)').forEach(el => el.classList.remove('active'));
+            addToRecentColors(color);
+            updateRecentColorsDisplay();
+            drawCanvas();
+            showToast('Barva posodobljena');
+        }
+
+        function addToRecentColors(color) {
+            recentColors = recentColors.filter(c => c !== color);
+            recentColors.unshift(color);
+            recentColors = recentColors.slice(0, 6);
+            localStorage.setItem('recentColors', JSON.stringify(recentColors));
+        }
+
+        function updateRecentColorsDisplay() {
+            const grid = document.getElementById('recent-colors-grid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < 6; i++) {
+                const div = document.createElement('div');
+                if (recentColors[i]) {
+                    div.className = 'recent-color';
+                    div.style.background = recentColors[i];
+                    div.onclick = () => selectRecentColor(recentColors[i]);
+                } else {
+                    div.className = 'recent-color empty';
+                }
+                grid.appendChild(div);
+            }
+        }
+
+        function selectRecentColor(color) {
+            settings.color = color;
+            document.getElementById('current-color-display').style.background = color;
+            document.getElementById('color-picker-input').value = color;
+            document.querySelectorAll('.color-swatch:not(.color-wheel)').forEach(el => el.classList.remove('active'));
+            addToRecentColors(color);
+            drawCanvas();
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAppSettings(); // Apply font size and theme from settings
+            updateRecentColorsDisplay();
+            loadDailyQuote();
+        });
+
+        window.addEventListener('resize', () => {
+            if (currentImage) drawCanvas();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#143028">
+    
+    <title>Thinkel - Nastavitve</title>
+    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+
+    <div id="app-container">
+        <header>
+            <h1>Thinkel</h1>
+        </header>
+
+        <main>
+            <h2 style="margin-top:0; font-size: 1.4rem; color: var(--accent-gold);" data-i18n="settings">Nastavitve</h2>
+            
+            <div class="card">
+                <div class="setting-item">
+                    <label class="setting-label" data-i18n="theme">Tema</label>
+                    <div class="segment-control" id="theme-control">
+                        <div class="segment-pill"></div>
+                        <div class="segment-opt" data-value="dark" onclick="changeTheme('dark')" data-i18n="dark">Temna</div>
+                        <div class="segment-opt" data-value="light" onclick="changeTheme('light')" data-i18n="light">Svetla</div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label" data-i18n="font_size">Velikost pisave</label>
+                    <div class="segment-control" id="font-control">
+                        <div class="segment-pill"></div>
+                        <div class="segment-opt" data-value="small" onclick="changeFontSize('small')" data-i18n="small">Majhna</div>
+                        <div class="segment-opt" data-value="medium" onclick="changeFontSize('medium')" data-i18n="medium">Srednja</div>
+                        <div class="segment-opt" data-value="large" onclick="changeFontSize('large')" data-i18n="large">Velika</div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label" data-i18n="language">Jezik</label>
+                    <div class="segment-control" id="lang-control">
+                        <div class="segment-pill"></div>
+                        <div class="segment-opt" data-value="sl" onclick="changeLanguage('sl')">Slovenščina</div>
+                        <div class="segment-opt" data-value="en" onclick="changeLanguage('en')">English</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="setting-item">
+                    <span class="setting-label" data-i18n="wallpaper_editor">Urejevalnik ozadij</span>
+                    <div class="setting-control">
+                        <a href="wallpaper.html" class="btn btn-primary" style="text-decoration: none;">
+                            <span class="material-icons-round">wallpaper</span>
+                            <span data-i18n="open_wallpaper">Odpri urejevalnik</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="setting-item">
+                    <span class="setting-label" data-i18n="backup">Varnostna kopija</span>
+                    <div class="setting-control">
+                        <button class="btn btn-primary" onclick="exportBackup()" data-i18n="download_backup">Prenesi backup</button>
+                    </div>
+                </div>
+                <div class="setting-item" style="border-bottom: none;">
+                    <span class="setting-label" data-i18n="restore">Obnovi iz backupa</span>
+                    <div class="setting-control">
+                        <input type="file" id="restore-file" accept=".thinkel,.json" onchange="importBackup(this)">
+                        <label for="restore-file" class="btn btn-secondary" data-i18n="restore">Obnovi iz backupa</label>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item">
+                <span class="nav-quote-icon">❞</span>
+                <span data-i18n="nav_today">Domov</span>
+            </a>
+            <a href="saved.html" class="nav-item">
+                <span class="material-icons-round">bookmark</span>
+                <span data-i18n="nav_saved">Shranjeno</span>
+            </a>
+            <a href="settings.html" class="nav-item active">
+                <span class="material-icons-round">settings</span>
+                <span data-i18n="nav_settings">Nastavitve</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <span class="material-icons-round toast-icon">check_circle</span>
+        <span id="toast-message">Sporočilo</span>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Initialize settings page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            updateTexts();
+            requestAnimationFrame(() => {
+                updateControlUI('theme-control', localStorage.getItem('theme') || 'dark');
+                updateControlUI('font-control', localStorage.getItem('fontSize') || 'medium');
+                updateControlUI('lang-control', localStorage.getItem('lang') || 'sl');
+            });
+        });
+    </script>
+</body>
+</html>

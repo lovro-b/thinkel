@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#143028">
+    
+    <title>Thinkel - Dnevna Inspiracija</title>
+    <meta name="description" content="Thinkel: Dnevna inspiracija, citati in osebni dnevnik.">
+    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+
+    <div id="app-container">
+        <header>
+            <h1>Thinkel</h1>
+        </header>
+
+        <main>
+            <div class="card date-card">
+                <button class="date-picker-btn" onclick="document.getElementById('hidden-date-input').showPicker()" aria-label="Izberi datum">
+                    <span class="material-icons-round">today</span>
+                </button>
+                <div class="date-content">
+                    <div id="date-label" class="date-label" data-i18n="today">Danes</div>
+                    <div id="current-date" class="date-text">...</div>
+                </div>
+                <input type="date" id="hidden-date-input" onchange="handleDateChange(this.value)" style="opacity: 0; position: absolute; pointer-events: none; width:1px; height:1px;">
+            </div>
+
+            <div class="card">
+                <div id="quote-content-wrapper">
+                    <div id="daily-quote-text" class="quote-text">...</div>
+                    <div id="daily-quote-author" class="quote-author"></div>
+                    <div class="action-buttons">
+                        <button class="action-btn primary" onclick="shareQuote()">
+                            <span class="material-icons-round">share</span>
+                        </button>
+                        <button id="btn-fav-daily" class="action-btn fav" onclick="toggleFavorite(currentQuote.id)">
+                            <span class="material-icons-round">favorite_border</span>
+                        </button>
+                        <button class="action-btn" onclick="openNotesModal()">
+                            <span class="material-icons-round">edit_note</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="info-card" class="card">
+                <button class="date-picker-btn" style="top: 15px; right: 15px; left: auto; transform: none;" onclick="hideInfoCard()">
+                    <span class="material-icons-round">close</span>
+                </button>
+                <div style="padding-right: 20px;">
+                    <div style="margin-bottom: 10px; display:flex; align-items:center; gap:10px;">
+                        <span class="material-icons-round" style="color: var(--accent-gold)">lightbulb</span>
+                        <span style="font-weight:700;" data-i18n="usage_tips">Znamki za uporabo</span>
+                    </div>
+                    <ul style="margin:0; padding-left:20px; font-size: 0.9rem; color: var(--text-secondary);">
+                        <li data-i18n="tip1">Kliknite srce, da citat shranite.</li>
+                        <li data-i18n="tip2">Kliknite ikono za zapiske za misli.</li>
+                        <li data-i18n="tip3">Pri zapiskih uporabite dolgi klik za urejanje ali brisanje.</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item active">
+                <span class="nav-quote-icon">❞</span>
+                <span data-i18n="nav_today">Domov</span>
+            </a>
+            <a href="saved.html" class="nav-item">
+                <span class="material-icons-round">bookmark</span>
+                <span data-i18n="nav_saved">Shranjeno</span>
+            </a>
+            <a href="settings.html" class="nav-item">
+                <span class="material-icons-round">settings</span>
+                <span data-i18n="nav_settings">Nastavitve</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Notes Modal -->
+    <div id="notes-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title" data-i18n="my_thoughts">Moje misli</h3>
+                <button class="btn btn-icon-only" style="background:transparent; color:var(--text-primary); width:auto;" onclick="closeNotesModal()">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div id="modal-quote-ref" class="modal-quote-ref">
+                <span id="modal-quote-text" class="modal-quote-text">...</span>
+                <span id="modal-quote-author" class="modal-quote-author">...</span>
+            </div>
+            
+            <textarea id="modal-note-input" class="modal-note-area" placeholder="..." oninput="saveNoteFromModal()"></textarea>
+            <button class="btn btn-primary" onclick="closeNotesModal()" data-i18n="save_close">Shrani in zapri</button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <span class="material-icons-round toast-icon">check_circle</span>
+        <span id="toast-message">Sporočilo</span>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Initialize home page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            loadDate();
+            checkInfoCard();
+            loadDailyQuote();
+            updateTexts();
+        });
+    </script>
+</body>
+</html>

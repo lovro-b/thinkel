@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#143028">
+    
+    <title>Thinkel - Shranjeno</title>
+    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+
+    <div id="app-container">
+        <header>
+            <h1>Thinkel</h1>
+        </header>
+
+        <main>
+            <div class="saved-tabs">
+                <div class="saved-tab active" id="tab-fav" onclick="switchSavedTab('fav')">
+                    <span class="material-icons-round">favorite</span>
+                    <span data-i18n="favorites">Priljubljene</span>
+                </div>
+                <div class="saved-tab" id="tab-notes" onclick="switchSavedTab('notes')">
+                    <span class="material-icons-round">edit_note</span>
+                    <span data-i18n="notes">Zapiski</span>
+                </div>
+            </div>
+
+            <div class="search-container">
+                <div class="search-input-wrapper">
+                    <span class="material-icons-round">search</span>
+                    <input type="text" id="search-input" class="search-input" placeholder="Iskanje..." oninput="handleSearch(this.value)">
+                </div>
+            </div>
+
+            <div id="saved-favorites-container">
+                <div id="favorites-list"></div>
+                <div id="no-favorites" style="display:none; text-align: center; color: var(--text-secondary); margin-top: 50px;">
+                    <span class="material-icons-round" style="font-size: 48px; opacity: 0.5;">favorite_border</span>
+                    <p data-i18n="no_fav">Ni shranjenih citatov.</p>
+                </div>
+            </div>
+
+            <div id="saved-notes-container" style="display: none;">
+                <div id="notes-list"></div>
+                <div id="no-notes" style="display:none; text-align: center; color: var(--text-secondary); margin-top: 50px;">
+                    <span class="material-icons-round" style="font-size: 48px; opacity: 0.5;">edit_note</span>
+                    <p data-i18n="no_notes">Ni zapisanih misli.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item">
+                <span class="nav-quote-icon">❞</span>
+                <span data-i18n="nav_today">Domov</span>
+            </a>
+            <a href="saved.html" class="nav-item active">
+                <span class="material-icons-round">bookmark</span>
+                <span data-i18n="nav_saved">Shranjeno</span>
+            </a>
+            <a href="settings.html" class="nav-item">
+                <span class="material-icons-round">settings</span>
+                <span data-i18n="nav_settings">Nastavitve</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Notes Modal -->
+    <div id="notes-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title" data-i18n="my_thoughts">Moje misli</h3>
+                <button class="btn btn-icon-only" style="background:transparent; color:var(--text-primary); width:auto;" onclick="closeNotesModal()">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div id="modal-quote-ref" class="modal-quote-ref">
+                <span id="modal-quote-text" class="modal-quote-text">...</span>
+                <span id="modal-quote-author" class="modal-quote-author">...</span>
+            </div>
+            
+            <textarea id="modal-note-input" class="modal-note-area" placeholder="..." oninput="saveNoteFromModal()"></textarea>
+            <button class="btn btn-primary" onclick="closeNotesModal()" data-i18n="save_close">Shrani in zapri</button>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div id="delete-modal" class="modal-overlay" onclick="closeDeleteModal(event)">
+        <div class="modal-card">
+            <span class="material-icons-round" style="color:var(--danger); font-size:48px; display:block; width:100%; text-align:center; margin-bottom:15px;">warning</span>
+            <h3 class="modal-title" style="text-align:center;" id="delete-modal-title" data-i18n="delete_confirm_title">Izbriši citat?</h3>
+            <p style="color:var(--text-secondary); margin-bottom:25px; text-align:center;" id="delete-modal-text" data-i18n="delete_confirm_text">Ali ste prepričani?</p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="btn btn-secondary" onclick="closeDeleteModal(null, true)" data-i18n="cancel">Prekliči</button>
+                <button class="btn btn-danger" id="confirm-delete-btn" onclick="confirmDelete()" data-i18n="delete_yes">Da, izbriši</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <span class="material-icons-round toast-icon">check_circle</span>
+        <span id="toast-message">Sporočilo</span>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Initialize saved page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            updateTexts();
+            document.getElementById('search-input').value = "";
+            searchQuery = "";
+            renderSaved();
+        });
+    </script>
+</body>
+</html>
