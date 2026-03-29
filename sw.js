@@ -10,8 +10,6 @@ const ASSETS_TO_CACHE = [
   './manifest.json',
   './sl.citati.json',
   './en.citati.json',
-  './icon-192x192.png',
-  './icon-512x512.png',
   'https://fonts.googleapis.com/icon?family=Material+Icons+Round',
   'https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap',
   'https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Caveat:wght@400;700&family=Montserrat:wght@400;600&family=Merriweather:wght@300;400;700&family=Dancing+Script:wght@400;700&display=swap'
@@ -46,22 +44,8 @@ self.addEventListener('activate', (event) => {
 // Fetch Assets
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((networkResponse) => {
-        // Only cache successful external requests
-        if (networkResponse && networkResponse.status === 200) {
-          return caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
-        }
-        return networkResponse;
-      }).catch(() => {
-        // Potentially handle offline fallback here
-      });
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
     })
   );
 });

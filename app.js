@@ -2,11 +2,11 @@
 let currentQuotes = [];
 let fallbackQuotes = {
     sl: [
-        {"id": 1, "text": "Ne moreš spremeniti nekoga. Lahko jih poskušaš razumeti, jih opazuješ in poslušaš. Ko jih razumeš, jim lahko pomagaš, da se spremenijo.", "author": "Neznan avtor"},
-        {"id": 2, "text": "Obstaja samo ena pot – sledi svojemu srcu.", "author": "Neznan avtor"},
-        {"id": 3, "text": "Pozorno opazuj ljudi. Opazil boš, če nekaj skrivajo. Ne glede na to, ali hočejo ali ne, bo njihovo vedenje to razkrilo.", "author": "Neznan avtor"},
-        {"id": 4, "text": "Ne nasprotuj brez razmišljanja idejam drugih. Poskušaj jih razumeti. Morda ti želijo pokazati nekaj, česar sam ne opažaš.", "author": "Neznan avtor"},
-        {"id": 5, "text": "Če opaziš, da ljudje delajo čudne stvari, jih ne sprašuj, kako so to naredili, ker ti ne bodo povedali. Namesto tega jih natančno opazuj – razlog za njihov uspeh je razviden iz njihovih dejanj.", "author": "Neznan avtor"}
+        {"id": 1, "text": "Ne moreš spremeniti nekoga. Lahko jih poskušaš razumeti, jih opazuješ in poslušaš. Ko jih razumeš, jim lahko pomagaš, da se spremenijo.", "author": "Anonymous"},
+        {"id": 2, "text": "Obstaja samo ena pot – sledi svojemu srcu.", "author": "Anonymous"},
+        {"id": 3, "text": "Pozorno opazuj ljudi. Opazil boš, če nekaj skrivajo. Ne glede na to, ali hočejo ali ne, bo njihovo vedenje to razkrilo.", "author": "Anonymous"},
+        {"id": 4, "text": "Ne nasprotuj brez razmišljanja idejam drugih. Poskušaj jih razumeti. Morda ti želijo pokazati nekaj, česar sam ne opažaš.", "author": "Anonymous"},
+        {"id": 5, "text": "Če opaziš, da ljudje delajo čudne stvari, jih ne sprašuj, kako so to naredili, ker ti ne bodo povedali. Namesto tega jih natančno opazuj – razlog za njihov uspeh je razviden iz njihovih dejanj.", "author": "Anonymous"}
     ],
     en: [
         {"id": 1, "text": "You can't change someone. You can try to understand them, watch them, and listen to them. When you understand them, you can help them to change.", "author": "Anonymous"},
@@ -698,23 +698,14 @@ function escapeHtml(text) {
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('Service Worker registered'))
+            .then(reg => console.log('Service Worker registered', reg))
             .catch(err => console.error('Service Worker registration failed', err));
     });
 }
 
 // PWA Installation handling
-// The 'beforeinstallprompt' event is fired by the browser when the PWA is installable.
-// We prevent the default browser prompt and show our custom install button instead.
-// Note: Some browsers may show a console warning about preventDefault() being called,
-// which is expected when using a custom installation UI.
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
-    // Only show the button if not already in standalone mode
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-        return;
-    }
-
     e.preventDefault();
     deferredPrompt = e;
     const installBtn = document.getElementById('install-pwa-btn');
