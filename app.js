@@ -46,7 +46,8 @@ const translations = {
         usage_tips: "Namigi za uporabo", tip1: "Kliknite srce, da citat shranite.", tip2: "Kliknite ikono za zapiske za misli.", tip3: "Pri zapiskih uporabite dolgi klik za urejanje ali brisanje.",
         copied: "Kopirano", added_fav: "Dodano med priljubljene", removed_fav: "Odstranjeno", removed_note: "Zapisek izbrisan.",
         toast_backup_success: "Backup uspešno prenesen.", toast_restore_success: "Podatki uspešno obnovljeni.",
-        wallpaper_editor: "Urejevalnik ozadij", open_wallpaper: "Odpri urejevalnik"
+        wallpaper_editor: "Urejevalnik ozadij", open_wallpaper: "Odpri urejevalnik",
+        pwa_install_title: "Prenesi aplikacijo", pwa_install_desc: "Uporabljajte Thinkel kjerkoli, tudi brez povezave.", pwa_install_btn: "Namesti"
     },
     en: {
         nav_today: "Home", nav_saved: "Saved", nav_settings: "Settings",
@@ -63,7 +64,8 @@ const translations = {
         usage_tips: "Usage Tips", tip1: "Tap heart to save quote.", tip2: "Tap note icon for thoughts.", tip3: "Use long press on notes to edit or delete.",
         copied: "Copied", added_fav: "Added to favorites", removed_fav: "Removed from favorites", removed_note: "Note deleted.",
         toast_backup_success: "Backup downloaded successfully.", toast_restore_success: "Data restored successfully.",
-        wallpaper_editor: "Wallpaper Editor", open_wallpaper: "Open Editor"
+        wallpaper_editor: "Wallpaper Editor", open_wallpaper: "Open Editor",
+        pwa_install_title: "Download App", pwa_install_desc: "Use Thinkel anywhere, even offline.", pwa_install_btn: "Install"
     }
 };
 
@@ -691,3 +693,38 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker registered', reg))
+            .catch(err => console.error('Service Worker registration failed', err));
+    });
+}
+
+// PWA Installation handling
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const installBtn = document.getElementById('install-pwa-btn');
+    if (installBtn) installBtn.style.display = 'flex';
+});
+
+async function installPWA() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+        const installBtn = document.getElementById('install-pwa-btn');
+        if (installBtn) installBtn.style.display = 'none';
+    }
+    deferredPrompt = null;
+}
+
+window.addEventListener('appinstalled', () => {
+    const installBtn = document.getElementById('install-pwa-btn');
+    if (installBtn) installBtn.style.display = 'none';
+    deferredPrompt = null;
+});
