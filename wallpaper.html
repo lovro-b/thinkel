@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#143028">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
     
     <title>Thinkel - Urejevalnik Ozadij</title>
     
@@ -882,14 +885,14 @@
             }
             
             const today = new Date();
-            const start = new Date(today.getFullYear(), 0, 0);
-            const diff = today - start;
-            const oneDay = 1000 * 60 * 60 * 24;
-            const dayOfYear = Math.floor(diff / oneDay);
-            const index = dayOfYear % currentQuotes.length;
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            const day = today.getDate();
+            const seed = (year * 10000) + (month * 100) + day;
+            const index = seed % currentQuotes.length;
             currentQuote = currentQuotes[index];
             
-            settings.text = currentQuote.text;
+            settings.text = currentQuote.text || currentQuote.besedilo || "";
             
             if (currentImage) drawCanvas();
         }

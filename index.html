@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#143028">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
     
     <title>Thinkel - Dnevna Inspiracija</title>
     <meta name="description" content="Thinkel: Dnevna inspiracija, citati in osebni dnevnik.">
@@ -23,7 +26,7 @@
 
         <main>
             <div class="card date-card">
-                <button class="date-picker-btn" onclick="document.getElementById('hidden-date-input').showPicker()" aria-label="Izberi datum">
+                <button class="date-picker-btn" onclick="openDatePicker()" aria-label="Izberi datum">
                     <span class="material-icons-round">today</span>
                 </button>
                 <div class="date-content">
@@ -113,6 +116,19 @@
 
     <script src="app.js"></script>
     <script>
+        function openDatePicker() {
+            const input = document.getElementById('hidden-date-input');
+            if (input.showPicker) {
+                try {
+                    input.showPicker();
+                } catch (e) {
+                    input.click();
+                }
+            } else {
+                input.click();
+            }
+        }
+
         // Initialize home page
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
