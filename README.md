@@ -2,7 +2,7 @@
 
 Thinkel is a beautiful web application designed to inspire and encourage reflection through daily quotes and personal notes.
 
-Available at: [https://lovro-b.github.io/thinkel/index.html](https://lovro-b.github.io/thinkel/index.html)
+Available at: [https://lovro-abram.github.io/thinkel/index.html](https://lovro-abram.github.io/thinkel/index.html)
 
 ## Features
 
